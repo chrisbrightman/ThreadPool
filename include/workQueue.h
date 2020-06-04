@@ -24,7 +24,7 @@ namespace tp{
     template<class T>
     class workQueue {
 
-        std::queue<task_s<T>*> toDo;
+        std::queue<std::shared_ptr<task_s<T>>> toDo;
         int size;
 
     public:
@@ -32,26 +32,27 @@ namespace tp{
 
         workQueue() {
             size = 0;
-            toDo = std::queue<task_s<T>*>();
+            toDo = std::queue<std::shared_ptr<task_s<T>>>();
         }
 
         virtual std::shared_ptr<task_s<T>> addWork(std::function<T()> function) {
-            task_s<T> *task = new task_s<T>;
+            std::shared_ptr<task_s<T>> task(new task_s<T>);
             task->function = function;
             task->isComplete = false;
             lock.lock();
             toDo.push(task);
             size++;
             lock.unlock();
-            return std::unique_ptr<task_s<T>>(task);
+            return std::shared_ptr<task_s<T>>(task);
         }
 
-        virtual task_s<T> *dequeueWork() {
+        virtual std::shared_ptr<task_s<T>> dequeueWork() {
             lock.lock();
             if (isWorkDone()) {
+                lock.unlock();
                 return nullptr;
             }
-            task_s<T> *someWork(toDo.front());
+            std::shared_ptr<task_s<T>> someWork(toDo.front());
             toDo.pop();
             size--;
             lock.unlock();

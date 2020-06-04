@@ -8,9 +8,9 @@
 
 #include <thread>
 #include <queue>
-#include <stack>
 #include <functional>
-#include <atomic>
+#include <vector>
+#include <array>
 #include "workQueue.h"
 
 #include <iostream>
@@ -19,31 +19,23 @@ namespace tp {
 
     template <class T>
     class threadPool {
-        std::stack<std::shared_ptr<std::thread>> threads;
-        workQueue<T> *workQ;
+
+        std::vector<std::shared_ptr<std::thread>> threads = std::vector<std::shared_ptr<std::thread>>();
+        std::unique_ptr<workQueue<T>> workQ;
         bool isDone;
 
     public:
 
         threadPool(unsigned int maxThreads = std::thread::hardware_concurrency()) {
-            this->workQ = new workQueue<T>();
+            this->workQ = std::unique_ptr<workQueue<T>>(new workQueue<T>());
             isDone = false;
-            threads = std::stack<std::shared_ptr<std::thread>>();
             for (int i = 0; i < maxThreads; i++) {
-                threads.push( std::shared_ptr<std::thread>(new std::thread(&threadPool::operate, this)));
+                threads.push_back(std::shared_ptr<std::thread>(new std::thread(&threadPool::operate, this, i)));
             }
         }
 
         ~threadPool() {
-            isDone = true;
-            for (int i = 0; i < threads.size(); i++) {
-                std::shared_ptr<std::thread> thread = threads.top();
-                if (thread->joinable()) {
-                    thread->join();
-                }
-                threads.pop();
-            }
-            delete workQ;
+            waitUntilDone();
         }
 
         std::shared_ptr<task_s<T>> addWork(std::function<T()> work) {
@@ -52,29 +44,30 @@ namespace tp {
 
         void waitUntilDone() {
             isDone = true;
-            for (int i = 0; i < threads.size(); i++) {
-                try {
-                    std::shared_ptr<std::thread> thread = threads.top();
+            try {
+                while(!threads.empty()) {
+                    std::shared_ptr<std::thread> thread = threads.back();
+                    threads.pop_back();
                     if (thread->joinable()) {
                         thread->join();
                     }
                 }
-                catch (const std::exception& ex) {
-                    std::cout << ex.what();
-                }
+            }
+            catch (const std::exception& ex) {
+                std::cout << "Thrown by threadPool wait: " << ex.what() << std::endl;
             }
         }
 
     private:
 
-        void operate() {
+        void operate(int id) {
             try {
                 while (!isDone || !workQ->isWorkDone()) {
                     if (workQ->isWorkDone()) {
                         std::this_thread::sleep_for(std::chrono::milliseconds(10));
                         continue;
                     }
-                    task_s<T> *toDo = workQ->dequeueWork();
+                    std::shared_ptr<task_s<T>> toDo = workQ->dequeueWork();
                     if (toDo) {
                         toDo->returnValue = toDo->function();
                         toDo->isComplete = true;
@@ -84,10 +77,9 @@ namespace tp {
             } catch (const std::exception& ex) {
                 std::cout << ex.what();
                 std::cout << "I'm here";
-
             }
+            threads.erase(threads.begin() + id);
         }
-
     };
 
 

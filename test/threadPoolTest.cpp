@@ -16,8 +16,8 @@
 
 using namespace tp;
 
-#define MAXTHREADS  6 * 4
-#define TOMAKE 10
+#define MAXTHREADS  6 * 2000
+#define TOMAKE valuse200
 
 double foo(int a, int b, int c) {
     int squared = pow(b, 2) - (4 * a * c);

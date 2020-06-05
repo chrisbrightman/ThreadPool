@@ -12,6 +12,7 @@
 #include <vector>
 #include <array>
 #include "workQueue.h"
+#include "workerThread.h"
 
 #include <iostream>
 
@@ -20,17 +21,18 @@ namespace tp {
     template <class T>
     class threadPool {
 
-        std::vector<std::shared_ptr<std::thread>> threads = std::vector<std::shared_ptr<std::thread>>();
-        std::unique_ptr<workQueue<T>> workQ;
+        std::vector<std::shared_ptr<workerThread>> threads = std::vector<std::shared_ptr<workerThread>>();
+
+        std::shared_ptr<workQueue<T>> workQ;
         bool isDone;
 
     public:
 
-        threadPool(unsigned int maxThreads = std::thread::hardware_concurrency()) {
-            this->workQ = std::unique_ptr<workQueue<T>>(new workQueue<T>());
+        explicit threadPool (unsigned maxThreads = std::thread::hardware_concurrency()) {
+            this->workQ = std::shared_ptr<workQueue<T>>(new workQueue<T>());
             isDone = false;
-            for (int i = 0; i < maxThreads; i++) {
-                threads.push_back(std::shared_ptr<std::thread>(new std::thread(&threadPool::operate, this, i)));
+            for (unsigned int i = 0; i < maxThreads; i++) {
+                threads.push_back(std::shared_ptr<workerThread>(new workerThread(std::forward<unsigned >(i), workQ)));
             }
         }
 
@@ -46,39 +48,17 @@ namespace tp {
             isDone = true;
             try {
                 while(!threads.empty()) {
-                    std::shared_ptr<std::thread> thread = threads.back();
+                    std::shared_ptr<workerThread> thread = threads.back();
                     threads.pop_back();
                     if (thread->joinable()) {
                         thread->join();
+                        thread->markDone();
                     }
                 }
             }
             catch (const std::exception& ex) {
                 std::cout << "Thrown by threadPool wait: " << ex.what() << std::endl;
             }
-        }
-
-    private:
-
-        void operate(int id) {
-            try {
-                while (!isDone || !workQ->isWorkDone()) {
-                    if (workQ->isWorkDone()) {
-                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                        continue;
-                    }
-                    std::shared_ptr<task_s<T>> toDo = workQ->dequeueWork();
-                    if (toDo) {
-                        toDo->returnValue = toDo->function();
-                        toDo->isComplete = true;
-                    }
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                }
-            } catch (const std::exception& ex) {
-                std::cout << ex.what();
-                std::cout << "I'm here";
-            }
-            threads.erase(threads.begin() + id);
         }
     };
 

@@ -17,7 +17,7 @@
 using namespace tp;
 
 #define MAXTHREADS  6 * 2000
-#define TOMAKE valuse200
+#define TOMAKE 200
 
 double foo(int a, int b, int c) {
     int squared = pow(b, 2) - (4 * a * c);
@@ -29,7 +29,7 @@ double foo(int a, int b, int c) {
 }
 
 TEST(ThreadPoolTest, addWork) {
-    threadPool<double> test(MAXTHREADS);
+    threadPool test();
     auto valuse = new std::shared_ptr<task_s<double>>[TOMAKE][TOMAKE][TOMAKE];
     auto now = std::chrono::steady_clock::now();
     for (int i = 1; i < TOMAKE + 1; i++) {

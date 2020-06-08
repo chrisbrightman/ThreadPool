@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 11)
 file(GLOB threadPoolSrc ./src/*.cpp ./src/*.h)
 file(GLOB threadPoolTestSrc ./test/*.cpp ./test/*.h)
 
-add_library(libtp STATIC ${threadPoolSrc} "include/workerThread.h" "include/workerThread.h" "src/workerThread.cpp")
+add_definitions(-DTHREAD_POOL_DEBUG)
+
+add_library(libtp STATIC ${threadPoolSrc} "include/workerThread.h" "include/workerThread.h" "src/workerThread.cpp" "include/bossThread.h")
 
 ##################
 ## adding gtest ##
@@ -46,5 +48,5 @@ endif()
 
 include_directories(./include)
 
-add_executable(tests ${threadPoolTestSrc} "include/workerThread.h" "include/workerThread.h" "src/workerThread.cpp")
+add_executable(tests ${threadPoolTestSrc} "include/workerThread.h" "include/workerThread.h" "src/workerThread.cpp" "include/bossThread.h")
 target_link_libraries(tests libtp gtest gmock)

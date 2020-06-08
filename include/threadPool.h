@@ -10,49 +10,58 @@
 #include <queue>
 #include <functional>
 #include <stack>
+#include <unordered_map>
+#include <iostream>
+
 #include "workQueue.h"
 #include "workerThread.h"
+#include "bossThread.h"
 
-#include <iostream>
 
 namespace tp {
 
-    template <class T>
     class threadPool {
 
-        std::stack<std::shared_ptr<workerThread>> threads = std::stack<std::shared_ptr<workerThread>>();
+        std::unordered_map<std::type_info, std::shared_ptr<bossThread<class T>>> bosses;
 
-        std::shared_ptr<workQueue<T>> workQ;
+        unsigned maxThreads;
+
         bool isDone;
 
     public:
 
-        explicit threadPool (unsigned maxThreads = std::thread::hardware_concurrency()) {
-            this->workQ = std::shared_ptr<workQueue<T>>(new workQueue<T>());
+        explicit threadPool () {
             isDone = false;
-            for (unsigned int i = 0; i < maxThreads; i++) {
-                threads.push(std::shared_ptr<workerThread>(new workerThread(std::forward<unsigned >(i), workQ)));
-            }
+            bosses = std::unordered_map<std::type_info, std::shared_ptr<bossThread<class T>>>();
         }
 
         ~threadPool() {
             waitUntilDone();
         }
 
+        template<class T>
         std::shared_ptr<task_s<T>> addWork(std::function<T()> work) {
-            return workQ->addWork( work );
+            if (bosses[typeid(T)]) {
+                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread<T>());
+            }
+            return bosses[typeid(T)]->addWork(work);
+        }
+
+        template<class T> 
+        std::shared_ptr<task_s<T>> addWork(std::function<T()> work, unsigned maxThreads) {
+            if (bosses[typeid(T)]) {
+                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread<T>(maxThreads));
+            }
+            return bosses[typeid(T)]->addWork(work);
         }
 
         void waitUntilDone() {
             isDone = true;
             try {
-                while(!threads.empty()) {
-                    std::shared_ptr<workerThread> thread = threads.top();
-                    threads.pop();
-                    //if (thread->joinable()) {
-                        thread->markDone();
-                        thread->join();
-                    //}
+                for(auto i = bosses.begin(); i != bosses.end(); i++) {
+                    std::shared_ptr<bossThread<class T>> boss = bosses[i->first];
+                    boss->stopWork();
+                    bosses.erase(i->first);
                 }
             }
             catch (const std::exception& ex) {

@@ -10,16 +10,16 @@ namespace tp {
         while (!isFinished) {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-#ifdef THREAD_POOL_DEBUG
+        #ifdef THREAD_POOL_DEBUG
         std::cout << "workerThread: " << workerId << " exiting." << std::endl;
-#endif
+        #endif //  THREAD_POOL_DEBUG
     }
 
-    void workerThread::setName(unsigned anId) {
+    inline void workerThread::setName(unsigned anId) {
         workerId = anId;
     }
 
-    void workerThread::markDone() {
+    inline void workerThread::markDone() {
         isFinished = true;
     }
 

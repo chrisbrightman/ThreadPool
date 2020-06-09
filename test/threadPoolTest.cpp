@@ -29,13 +29,13 @@ double foo(int a, int b, int c) {
 }
 
 TEST(ThreadPoolTest, addWork) {
-    threadPool test();
+    threadPool test = threadPool();
     auto valuse = new std::shared_ptr<task_s<double>>[TOMAKE][TOMAKE][TOMAKE];
     auto now = std::chrono::steady_clock::now();
     for (int i = 1; i < TOMAKE + 1; i++) {
         for (int j = 0; j < TOMAKE; j++) {
             for (int k = 0; k < TOMAKE; k++) {
-                valuse[i - 1][j][k] = test.addWork([i, j, k]() { return foo(i, j, k); });
+                valuse[i - 1][j][k] = test.addWork([i, j, k] () { return foo(i, j, k); });
             }
         }
     }

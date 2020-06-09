@@ -32,7 +32,7 @@ namespace tp {
             isFinished = false;
         }
 
-	    void markDone();
+	    inline void markDone();
 
 		void setName(unsigned anId);
 

@@ -12,12 +12,12 @@
 
 namespace tp {
 
-	template<class T>
-	class bossThread {
+	class bossThread : public std::thread{
 
-		std::shared_ptr<workQueue<T>> work;
+		std::stack<std::shared_ptr<workerThread>> workers;
 
-		std::stack<workerThread> workers;
+		template<class T>
+		using word = std::shared_ptr<workQueue<T>>;
 
 		std::atomic<int> numberWorkers;
 
@@ -25,62 +25,68 @@ namespace tp {
 
 		unsigned maxThreads;
 
+		bool isFinished;
+
 	public:
+
+		template<class T>
+		bossThread(workQueue<T>& work) : std::thread( [this, work] () { this->operate(work); }) {
+
+		}
 
 		bossThread(unsigned threadMax = std::thread::hardware_concurrency() * 100) {
 			maxThreads = threadMax;
 			hardwareConcurency = std::thread::hardware_concurrency();
-			work = std::shared_ptr<workQueue<T>>(new workQueue<T>());
-			workerThread start(0, work);
 			numberWorkers = 0;
+			isFinished = false;
+			workers = std::stack<std::shared_ptr<workerThread>>();
 		}
 
 		~bossThread() {
 			stopWork();
 		}
 
-		void stopWork() {
-			for (int i = 0; i < numberWorkers; i++) {
-				try {
-					workerThread worker = workers.top();
-					wokers.pop();
-					worker.markDone();
-					worker.join();
-				}
-				catch (std::exception ex) {
-					std::cout << "Exception thrown by joining woker thread " << i << " " << ex.what() << std::endl;
-				}
-			}
-		}
+		void stopWork();
 
+		template<class T>
 		std::shared_ptr<task_s<T>> addWork(std::function<T()> func) {
-			std::shared_ptr<task_s<T>> work->addWork(func);
-			if (work->size() > )
+			std::shared_ptr<task_s<T>> task = work->addWork(func);
 		}
 
 	private:
 
-		void increaseThreads(int numToMake) {
+		template<class T>
+		void increaseThreads(int numToMake, workQueue<T>& work) {
 			if (numberWorkers = maxThreads) {
 				return;
 			}
 			if (numberWorkers + numToMake > maxThreads) {
 				#ifdef THREAD_POOL_DEBUG
 					std::cout << "Creating " << maxThreads - numberWorkers << " more workers." << std::endl;
-				#endif
+				#endif // THREAD_POOL_DEBUG
 				for (int i = 0; i < maxThreads - numberWorkers; i++) {
-					workers.push(workerThread(numberWorkers + i, work));
+					workers.push(std::shared_ptr<workerThread>(new workerThread(numberWorkers + i, work)));
 				}
 				numberWorkers = maxThreads;
 			}
 			else {
 				#ifdef THREAD_POOL_DEBUG
 					std::cout << "Creating " << numToMake<< " more workers." << std::endl;
-				#endif
+				#endif // THREAD_POOL_DEBUG
 				for (int i = 0; i < numToMake; i++) {
-					workers.push(workerThread(numberWorkers + i, work));
+					workers.push(std::shared_ptr<workerThread>(new workerThread(numberWorkers + i, work)));
 				}
 				numberWorkers += numToMake;
+			}
+	}
+		 
+		template<class T>
+		void operate(workQueue<T>& work) {
+			while (!isFinished) {
+				if (work->size > numberWorkers * 4) {
+					increaseThreads(numberWorkers, work);
+				}
+				std::this_thread::sleep_for(std::chrono::microseconds(100));
 			}
 		}
 

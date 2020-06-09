@@ -22,7 +22,7 @@ namespace tp {
 
     class threadPool {
 
-        std::unordered_map<std::type_info, std::shared_ptr<bossThread<class T>>> bosses;
+        std::unordered_map<std::type_info, std::shared_ptr<bossThread>> bosses;
 
         unsigned maxThreads;
 
@@ -32,7 +32,7 @@ namespace tp {
 
         explicit threadPool () {
             isDone = false;
-            bosses = std::unordered_map<std::type_info, std::shared_ptr<bossThread<class T>>>();
+            bosses = std::unordered_map<std::type_info, std::shared_ptr<bossThread>>();
         }
 
         ~threadPool() {
@@ -42,24 +42,26 @@ namespace tp {
         template<class T>
         std::shared_ptr<task_s<T>> addWork(std::function<T()> work) {
             if (bosses[typeid(T)]) {
-                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread<T>());
+                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread());
             }
             return bosses[typeid(T)]->addWork(work);
         }
 
+        /*
         template<class T> 
         std::shared_ptr<task_s<T>> addWork(std::function<T()> work, unsigned maxThreads) {
             if (bosses[typeid(T)]) {
-                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread<T>(maxThreads));
+                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread(maxThreads));
             }
             return bosses[typeid(T)]->addWork(work);
         }
+        */
 
         void waitUntilDone() {
             isDone = true;
             try {
                 for(auto i = bosses.begin(); i != bosses.end(); i++) {
-                    std::shared_ptr<bossThread<class T>> boss = bosses[i->first];
+                    std::shared_ptr<bossThread> boss = bosses[i->first];
                     boss->stopWork();
                     bosses.erase(i->first);
                 }

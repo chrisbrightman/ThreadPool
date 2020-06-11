@@ -25,19 +25,20 @@ namespace tp {
 
         std::shared_ptr<workQueue<T>> work;
 
-        std::stack<bossThread<T>> bosses;
+        std::stack<std::shared_ptr<bossThread<T>>> bosses;
 
-        unsigned maxThreads;
+        unsigned maxThreads{};
 
         bool isDone;
 
     public:
 
         threadPool () {
+            maxThreads = std::thread::hardware_concurrency() * 4;
             isDone = false;
-            bosses = std::stack<bossThread<T>>();
-            work = std::shared_ptr<workQueue<T>>();
-            bosses.push(bossThread<T>(work));
+            bosses = std::stack<std::shared_ptr<bossThread<T>>>();
+            work = std::shared_ptr<workQueue<T>>(new workQueue<T>());
+            bosses.push(std::shared_ptr<bossThread<T>>(new bossThread<T>(work)));
         }
 
         ~threadPool() {

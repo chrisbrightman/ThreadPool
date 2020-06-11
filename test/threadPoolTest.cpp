@@ -5,14 +5,10 @@
 #include <memory>
 #include <iostream>
 #include <chrono>
-#include <cstdlib>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "threadPool.h"
-
-
-
 
 using namespace tp;
 

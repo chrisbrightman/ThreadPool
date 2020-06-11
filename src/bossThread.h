@@ -15,7 +15,7 @@ namespace tp {
     template<class T>
 	class bossThread : public std::thread{
 
-		std::stack<workerThread<T>> workers;
+		std::stack<std::shared_ptr<workerThread<T>>> workers;
 
 		std::atomic<int> numberWorkers;
 
@@ -27,19 +27,19 @@ namespace tp {
 
 	public:
 
-		bossThread(std::shared_ptr<workQueue<T>>& work) : std::thread( [this] () { this->operate(); }) {
+		explicit bossThread(std::shared_ptr<workQueue<T>>& work) : std::thread( [this] () { this->operate(); }) {
 		    this->work = work;
             maxWorkers = std::thread::hardware_concurrency() * 100;
             isFinished = false;
             numberWorkers = 0;
-            workers = std::stack<workerThread<T>>();
+            workers = std::stack<std::shared_ptr<workerThread<T>>>();
 		}
 
-		bossThread(unsigned threadMax = std::thread::hardware_concurrency() * 100) {
+		explicit bossThread(unsigned threadMax = std::thread::hardware_concurrency() * 100) {
             maxWorkers = threadMax;
 			numberWorkers = 0;
 			isFinished = false;
-			workers = std::stack<workerThread<T>>();
+			workers = std::stack<std::shared_ptr<workerThread<T>>>();
 		}
 
 		~bossThread() {
@@ -49,7 +49,7 @@ namespace tp {
         void stopWork() {
             for (int i = 0; i < numberWorkers; i++) {
                 try {
-                    workerThread<T> worker = workers.top();
+                    std::shared_ptr<workerThread<T>> worker = workers.top();
                     workers.pop();
                     worker->markDone();
                     worker->join();
@@ -71,7 +71,7 @@ namespace tp {
 					std::cout << "Creating " << maxWorkers - numberWorkers << " more workers." << std::endl;
 				#endif // THREAD_POOL_DEBUG
 				for (int i = 0; i < maxWorkers - numberWorkers; i++) {
-					workers.push(workerThread<T>(numberWorkers + i, work));
+					workers.push(std::shared_ptr<workerThread<T>>(new workerThread<T>(numberWorkers + i, work)));
 				}
 				numberWorkers = maxWorkers;
 			}
@@ -80,7 +80,7 @@ namespace tp {
 					std::cout << "Creating " << numToMake<< " more workers." << std::endl;
 				#endif // THREAD_POOL_DEBUG
 				for (int i = 0; i < numToMake; i++) {
-					workers.push(workerThread<T>(numberWorkers + i, work));
+					workers.push(std::shared_ptr<workerThread<T>>(new workerThread<T>(numberWorkers + i, work)));
 				}
 				numberWorkers += numToMake;
 			}

@@ -20,9 +20,12 @@
 
 namespace tp {
 
+    template<class T>
     class threadPool {
 
-        std::unordered_map<std::type_info, std::shared_ptr<bossThread>> bosses;
+        std::shared_ptr<workQueue<T>> work;
+
+        std::stack<bossThread<T>> bosses;
 
         unsigned maxThreads;
 
@@ -30,40 +33,26 @@ namespace tp {
 
     public:
 
-        explicit threadPool () {
+        threadPool () {
             isDone = false;
-            bosses = std::unordered_map<std::type_info, std::shared_ptr<bossThread>>();
+            bosses = std::stack<bossThread<T>>();
+            work = std::shared_ptr<workQueue<T>>();
+            bosses.push(bossThread<T>(work));
         }
 
         ~threadPool() {
             waitUntilDone();
         }
 
-        template<class T>
-        std::shared_ptr<task_s<T>> addWork(std::function<T()> work) {
-            if (bosses[typeid(T)]) {
-                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread());
-            }
-            return bosses[typeid(T)]->addWork(work);
+        std::shared_ptr<task_s<T>> addWork(std::function<T()> someWork) {
+            return work->addWork(someWork);
         }
-
-        /*
-        template<class T> 
-        std::shared_ptr<task_s<T>> addWork(std::function<T()> work, unsigned maxThreads) {
-            if (bosses[typeid(T)]) {
-                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread(maxThreads));
-            }
-            return bosses[typeid(T)]->addWork(work);
-        }
-        */
 
         void waitUntilDone() {
             isDone = true;
             try {
-                for(auto i = bosses.begin(); i != bosses.end(); i++) {
-                    std::shared_ptr<bossThread> boss = bosses[i->first];
-                    boss->stopWork();
-                    bosses.erase(i->first);
+                while (!bosses.empty()) {
+                    bosses.pop();
                 }
             }
             catch (const std::exception& ex) {
@@ -72,7 +61,6 @@ namespace tp {
         }
 
     };
-
 
 }
 

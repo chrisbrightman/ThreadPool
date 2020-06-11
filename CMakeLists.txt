@@ -1,15 +1,12 @@
-cmake_minimum_required(VERSION 3.0)
-project(ThreadPool)
+cmake_minimum_required(VERSION 3.16)
+project(untitled)
 
 set(CMAKE_CXX_STANDARD 11)
 
 file(GLOB threadPoolSrc ./src/*.cpp ./src/*.h)
 file(GLOB threadPoolTestSrc ./test/*.cpp ./test/*.h)
 
-add_definitions(-DTHREAD_POOL_DEBUG)
-
-add_library(libtp STATIC ${threadPoolSrc})
-
+add_library(libtp STATIC ${threadPoolSrc} "include/workerThread.h" "include/workerThread.h" "src/workerThread.cpp")
 
 ##################
 ## adding gtest ##
@@ -47,7 +44,7 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-include_directories(./src)
+include_directories(./include)
 
-add_executable(tests ${threadPoolTestSrc})
+add_executable(tests ${threadPoolTestSrc} "include/workerThread.h" "include/workerThread.h" "src/workerThread.cpp")
 target_link_libraries(tests libtp gtest gmock)

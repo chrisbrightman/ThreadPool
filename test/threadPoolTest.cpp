@@ -29,7 +29,7 @@ double foo(int a, int b, int c) {
 }
 
 TEST(ThreadPoolTest, addWork) {
-    threadPool test = threadPool();
+    threadPool<double> test = threadPool<double>();
     auto valuse = new std::shared_ptr<task_s<double>>[TOMAKE][TOMAKE][TOMAKE];
     auto now = std::chrono::steady_clock::now();
     for (int i = 1; i < TOMAKE + 1; i++) {

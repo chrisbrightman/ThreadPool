@@ -6,7 +6,8 @@
 
 namespace tp {
 
-    workerThread::~workerThread() {
+    template<class T>
+    workerThread<T>::~workerThread() {
         while (!isFinished) {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
@@ -15,11 +16,13 @@ namespace tp {
         #endif //  THREAD_POOL_DEBUG
     }
 
-    inline void workerThread::setName(unsigned anId) {
+    template<class T>
+    inline void workerThread<T>::setName(unsigned anId) {
         workerId = anId;
     }
 
-    inline void workerThread::markDone() {
+    template<class T>
+    inline void workerThread<T>::markDone() {
         isFinished = true;
     }
 

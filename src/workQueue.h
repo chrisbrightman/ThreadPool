@@ -59,11 +59,11 @@ namespace tp{
             return someWork;
         }
 
-        virtual int workLeftToDo() {
+        inline int workLeftToDo() {
             return size;
         }
 
-        virtual bool isWorkDone() {
+        inline bool isWorkDone() {
             return size == 0;
         }
 

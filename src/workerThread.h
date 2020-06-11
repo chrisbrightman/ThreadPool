@@ -10,10 +10,13 @@
 
 namespace tp {
 
+    template<class T>
 	class workerThread  : public std::thread {
 
 	unsigned workerId;
 	bool isFinished;
+
+	std::shared_ptr<workQueue<T>> work;
 
 	public:
 
@@ -25,11 +28,11 @@ namespace tp {
 	    }
 	     */
 
-	    template<class T>
 	    workerThread(unsigned&& anId, std::shared_ptr<workQueue<T>>& workQ)
-	            : std::thread ( [ workQ, this] () { this->operate(workQ); } ) {
+	            : std::thread ( [ this] () { this->operate(); } ) {
             workerId = anId;
             isFinished = false;
+            work = workQ;
         }
 
 	    inline void markDone();
@@ -40,15 +43,14 @@ namespace tp {
 
     protected:
 
-	    template<class T>
-	    void operate(std::shared_ptr<workQueue<T>> workQ) {
+	    void operate() {
             try {
-                while (!isFinished || !workQ->isWorkDone()) {
-                    if (workQ->isWorkDone()) {
+                while (!isFinished || !work->isWorkDone()) {
+                    if (work->isWorkDone()) {
                         std::this_thread::sleep_for(std::chrono::milliseconds(10));
                         continue;
                     }
-                    std::shared_ptr<task_s<T>> toDo = workQ->dequeueWork();
+                    std::shared_ptr<task_s<T>> toDo = work->dequeueWork();
                     if (toDo) {
                         toDo->returnValue = toDo->function();
                         toDo->isComplete = true;

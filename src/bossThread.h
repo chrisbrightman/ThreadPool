@@ -13,11 +13,11 @@
 namespace tp {
 
     template<class T>
-	class bossThread : public std::thread{
+	class bossThread : public std::thread {
 
 		std::stack<std::shared_ptr<workerThread<T>>> workers;
 
-		std::atomic<int> numberWorkers;
+		std::atomic<int> numberWorkers{};
 
 		std::shared_ptr<workQueue<T>> work;
 

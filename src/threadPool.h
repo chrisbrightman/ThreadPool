@@ -49,6 +49,16 @@ namespace tp {
             return work->addWork(someWork);
         }
 
+        /*
+        template<class T> 
+        std::shared_ptr<task_s<T>> addWork(std::function<T()> work, unsigned maxThreads) {
+            if (bosses[typeid(T)]) {
+                bosses[typeid(T)] = std::shared_ptr<bossThread<T>>(new bossThread(maxThreads));
+            }
+            return bosses[typeid(T)]->addWork(work);
+        }
+        */
+
         void waitUntilDone() {
             isDone = true;
             try {

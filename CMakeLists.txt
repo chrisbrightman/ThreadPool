@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
-project(untitled CXX)
+project(untitled)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 file(GLOB threadPoolSrc ./src/*.cpp ./src/*.h)
 file(GLOB threadPoolTestSrc ./test/*.cpp ./test/*.h)
 
-add_library(libtp STATIC ${threadPoolSrc})
+add_library(libtp INTERFACE)
+target_include_directories(libtp INTERFACE ${threadPoolSrc})
 
 ##################
 ## adding gtest ##

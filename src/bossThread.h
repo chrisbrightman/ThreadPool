@@ -27,23 +27,22 @@ namespace tp {
 
 	public:
 
-		explicit bossThread(std::shared_ptr<workQueue<T>>& work) : std::thread( [this] () { this->operate(); }) {
-		    this->work = work;
-            maxWorkers = std::thread::hardware_concurrency() * 100;
-            isFinished = false;
-            numberWorkers = 0;
-            workers = std::stack<std::shared_ptr<workerThread<T>>>();
+		explicit bossThread(std::shared_ptr<workQueue<T>>& aWork) : bossThread(std::thread::hardware_concurrency() * 4, aWork) {
 		}
 
-		explicit bossThread(unsigned threadMax = std::thread::hardware_concurrency() * 100) {
-            maxWorkers = threadMax;
-			numberWorkers = 0;
-			isFinished = false;
-			workers = std::stack<std::shared_ptr<workerThread<T>>>();
+		explicit bossThread(unsigned threadMax, std::shared_ptr<workQueue<T>>& someWork) : std::thread([this] () { this->operate(); }) {
+		    this->work = someWork;
+            maxWorkers = std::thread::hardware_concurrency() * 4;
+            isFinished = false;
+            numberWorkers = 1;
+            workers = std::stack<std::shared_ptr<workerThread<T>>>();
+			workers.push(std::shared_ptr<workerThread<T>>(new workerThread<T>(0, someWork)));
 		}
 
 		~bossThread() {
-			stopWork();
+			if (!isFinished) {
+				stopWork();
+			}
 		}
 
         void stopWork() {
@@ -58,6 +57,7 @@ namespace tp {
                     std::cout << "Exception thrown by joining worker thread " << i << " " << ex.what() << std::endl;
                 }
             }
+			isFinished = true;
         }
 
 	private:
@@ -84,7 +84,7 @@ namespace tp {
 				}
 				numberWorkers += numToMake;
 			}
-	}
+		}
 		 
 		void operate() {
 			while (!isFinished) {

@@ -33,12 +33,14 @@ namespace tp {
 
     public:
 
-        threadPool () {
-            maxThreads = std::thread::hardware_concurrency() * 4;
+        threadPool () : threadPool(std::thread::hardware_concurrency() * 4) {
+        }
+        
+        threadPool(unsigned maxThreads) {
             isDone = false;
             bosses = std::stack<std::shared_ptr<bossThread<T>>>();
             work = std::shared_ptr<workQueue<T>>(new workQueue<T>());
-            bosses.push(std::shared_ptr<bossThread<T>>(new bossThread<T>(work)));
+            bosses.push(std::shared_ptr<bossThread<T>>(new bossThread<T>(maxThreads, work)));
         }
 
         ~threadPool() {
@@ -62,8 +64,17 @@ namespace tp {
         void waitUntilDone() {
             isDone = true;
             try {
+                auto doneQ = std::stack<std::shared_ptr<bossThread<T>>>();
                 while (!bosses.empty()) {
+                    std::shared_ptr<bossThread<T>> boss = bosses.top();
+                    boss->stopWork();
+                    doneQ.push(boss);
                     bosses.pop();
+                }
+                while (!doneQ.empty()) {
+                    std::shared_ptr<bossThread<T>> boss = doneQ.top();
+                    doneQ.pop();
+                    boss->join();
                 }
             }
             catch (const std::exception& ex) {

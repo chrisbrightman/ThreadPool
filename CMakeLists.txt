@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.16)
-project(untitled)
+cmake_minimum_required(VERSION 3.10)
+project(threadPool)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
@@ -9,6 +9,8 @@ file(GLOB threadPoolTestSrc ./test/*.cpp ./test/*.h)
 
 add_library(libtp INTERFACE)
 target_include_directories(libtp INTERFACE ${threadPoolSrc})
+
+add_definitions(-DTHREAD_POOL_DEBUG)
 
 ##################
 ## adding gtest ##

@@ -12,20 +12,24 @@
 
 using namespace tp;
 
-#define MAXTHREADS  6 * 2000
-#define TOMAKE 200
+#define MAXTHREADS (std::thread::hardware_concurrency() * 4) 
+#define TOMAKE 20
 
 double foo(int a, int b, int c) {
-    int squared = pow(b, 2) - (4 * a * c);
-    if (squared >= 0) {
-        double top = (double) (-1 * b) + (double) sqrt(squared);
-        return top / (2 * a);
+    for (int i = 0; i < 100; i++) {
+        for (int j = 0; j < 100; j++) {
+            int squared = pow(b, 2) - (4 * a * c);
+            if (squared >= 0) {
+                double top = (double) (-1 * b) + (double) sqrt(squared);
+                double g = top / (2 * a);
+            }
+        }
     }
     return 0;
 }
 
 TEST(ThreadPoolTest, addWork) {
-    threadPool<double> test = threadPool<double>();
+    threadPool<double> test = threadPool<double>(MAXTHREADS);
     auto valuse = new std::shared_ptr<task_s<double>>[TOMAKE][TOMAKE][TOMAKE];
     auto now = std::chrono::steady_clock::now();
     for (int i = 1; i < TOMAKE + 1; i++) {
@@ -41,9 +45,9 @@ TEST(ThreadPoolTest, addWork) {
     for (int i = 1; i < TOMAKE + 1; i++) {
         for (int j = 0; j < TOMAKE; j++) {
             for(int k = 0; k < TOMAKE; k++) {
-                EXPECT_EQ(valuse[i - 1][j][k]->returnValue, foo(i, j, k));
+                //EXPECT_EQ(valuse[i - 1][j][k]->returnValue, foo(i, j, k));
             }
         }
     }
-    std::cout << "ThreadPool.addWork time to complete: " << time.count();
+    std::cout << "ThreadPool.addWork time to complete: " << time.count() << std::endl;
 }

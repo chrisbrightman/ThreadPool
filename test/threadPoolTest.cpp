@@ -13,11 +13,11 @@
 using namespace tp;
 
 #define MAXTHREADS (std::thread::hardware_concurrency() * 4) 
-#define TOMAKE 20
+#define TOMAKE 24 
 
 double foo(int a, int b, int c) {
-    for (int i = 0; i < 100; i++) {
-        for (int j = 0; j < 100; j++) {
+    for (int i = 0; i < 1000; i++) {
+        for (int j = 0; j < 1000; j++) {
             int squared = pow(b, 2) - (4 * a * c);
             if (squared >= 0) {
                 double top = (double) (-1 * b) + (double) sqrt(squared);

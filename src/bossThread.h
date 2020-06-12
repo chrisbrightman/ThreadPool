@@ -32,7 +32,7 @@ namespace tp {
 
 		explicit bossThread(unsigned threadMax, std::shared_ptr<workQueue<T>>& someWork) : std::thread([this] () { this->operate(); }) {
 		    this->work = someWork;
-            maxWorkers = std::thread::hardware_concurrency() * 4;
+            maxWorkers = threadMax;
             isFinished = false;
             numberWorkers = 1;
             workers = std::stack<std::shared_ptr<workerThread<T>>>();

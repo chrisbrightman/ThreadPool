@@ -6,34 +6,50 @@
 #include <iostream>
 #include <functional>
 #include <string>
+#include <cmath>
+#include <thread>
+#include <memory>
 
 #include "timer.h"
 #include "tpmain.h"
 
+#define MAX_FOR_QUAD 1000000
+#define NUM_TASKS 1000000
+
 template<typename T>
-void time(const std::function<T()>& func, unsigned long numToDo, const std::string& msg, unsigned threadMax = 0) {
+void toTime(std::function<T()> func, unsigned long numToDo, std::string&& msg, const unsigned& threadMax = 0) {
     tp::threadPool<T> pool;
+    /*
     if (threadMax <= 0) {
         pool = tp::threadPool<T>();
     }
     else {
+     */
         pool = tp::threadPool<T>(threadMax);
-    }
+    //}
     std::cout << msg << std::endl;
     timer stopWatch = timer();
     for (unsigned long i = 0; i < numToDo; i++) {
-        pool.addWork(func());
+        pool.addWork([func] () { return func();});
     }
     pool.waitUntilDone();
 }
 
-int main() {
-    timer time = timer();
-    long j = 0;
-    for (long i = 0; i < 1000000000; i++) {
-        j += i;
+double quadratic_formula() {
+    std::unique_ptr<double[]> returnArray(new double[MAX_FOR_QUAD]);
+    for (int i = 1; i < MAX_FOR_QUAD; i++) {
+        double squared = pow(i, 2) - (4 * i * i);
+        if (squared >= 0) {
+            double top = (double) (-1 * i) + (double) sqrt(squared);
+            returnArray[i] = top / (2 * i);
+        }
     }
-    std::cout << j << std::endl;
+    return returnArray[0];
+}
+
+int main() {
+    const unsigned topThreads = std::thread::hardware_concurrency() * 4;
+    toTime<double>(quadratic_formula, NUM_TASKS, "Testing Quadratic Formula test.", topThreads);
     return EXIT_SUCCESS;
 }
 

@@ -4,7 +4,10 @@
 #include <thread>
 #include <string>
 #include <functional>
+
+#ifdef THREAD_POOL_DEBUG
 #include <iostream>
+#endif
 
 #include "workQueue.h"
 
@@ -62,6 +65,9 @@ namespace tp {
                         continue;
                     }
                     std::shared_ptr<task_s<T>> toDo = work->dequeueWork();
+                    #ifdef THREAD_POOL_DEBUG
+                        std::cout << "Worker Thread " << id << " grabed work of type " << type_info(T) << std::endl;
+                    #endif
                     if (toDo) {
                         toDo->returnValue = toDo->function();
                         toDo->isComplete = true;

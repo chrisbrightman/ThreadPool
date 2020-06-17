@@ -18,16 +18,13 @@
 
 template<typename T>
 void toTime(std::function<T()> func, unsigned long numToDo, std::string&& msg, const unsigned& threadMax = 0) {
-    tp::threadPool<T> pool;
-    /*
+    std::cout << msg << std::endl;
     if (threadMax <= 0) {
-        pool = tp::threadPool<T>();
+       tp::threadPool<T> pool = tp::threadPool<T>();
     }
     else {
-     */
-        pool = tp::threadPool<T>(threadMax);
-    //}
-    std::cout << msg << std::endl;
+        tp::threadPool<T> pool = tp::threadPool<T>(threadMax);
+    }
     timer stopWatch = timer();
     for (unsigned long i = 0; i < numToDo; i++) {
         pool.addWork([func] () { return func();});
@@ -48,6 +45,7 @@ double quadratic_formula() {
 }
 
 int main() {
+    std::cout << "I ar least get here\n:;
     const unsigned topThreads = std::thread::hardware_concurrency() * 4;
     toTime<double>(quadratic_formula, NUM_TASKS, "Testing Quadratic Formula test.", topThreads);
     return EXIT_SUCCESS;

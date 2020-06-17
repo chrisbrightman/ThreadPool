@@ -5,7 +5,10 @@
 #include <stack>
 #include <memory>
 #include <atomic>
+
+#ifdef THREAD_POOL_DEBUG
 #include <iostream>
+#endif
 
 #include "workQueue.h"
 #include "workerThread.h"

@@ -11,7 +11,10 @@
 #include <functional>
 #include <stack>
 #include <unordered_map>
+
+#ifdef THREAD_POOL_DEBUG
 #include <iostream>
+#endif
 
 #include "workQueue.h"
 #include "workerThread.h"
@@ -39,7 +42,13 @@ namespace tp {
         threadPool(unsigned maxThreads) {
             isDone = false;
             bosses = std::stack<std::shared_ptr<bossThread<T>>>();
+            #ifdef THREAD_POOL_DEBUG
+                std::cout << "initializing workQueue\n";
+            #endif // THREAD_POOL_DEBUG
             work = std::shared_ptr<workQueue<T>>(new workQueue<T>());
+            #ifdef THREAD_POOL_DEBUG
+                std::cout << "initializing bossThread\n";
+            #endif // THREAD_POOL_DEBUG
             bosses.push(std::shared_ptr<bossThread<T>>(new bossThread<T>(maxThreads, work)));
         }
 

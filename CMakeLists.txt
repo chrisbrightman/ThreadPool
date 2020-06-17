@@ -11,8 +11,10 @@ file(GLOB tpbenchSrc Benchmark/*.cpp Benchmark/*.h)
 add_library(libtp INTERFACE)
 target_include_directories(libtp INTERFACE ${threadPoolSrc})
 
+find_package(Threads)
+
 add_executable(tpbench ${tpbenchSrc})
-target_link_libraries(tpbench libtp)
+target_link_libraries(tpbench libtp ${CMAKE_THREADS_LIBS_INIT})
 
 ##################
 ## adding gtest ##
@@ -53,4 +55,4 @@ endif()
 include_directories(./src)
 
 add_executable(tests ${threadPoolTestSrc})
-target_link_libraries(tests libtp gtest gmock)
+target_link_libraries(tests libtp gtest gmock ${CMAKE_THREADS_LIBS_INIT})

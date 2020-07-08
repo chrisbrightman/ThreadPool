@@ -18,7 +18,7 @@ using namespace tp;
 double foo(int a, int b, int c) {
     for (int i = 0; i < 1000; i++) {
         for (int j = 0; j < 1000; j++) {
-            int squared = pow(b, 2) - (4 * a * c);
+            double squared = pow(b, 2) - (4 * a * c);
             if (squared >= 0) {
                 double top = (double) (-1 * b) + (double) sqrt(squared);
                 double g = top / (2 * a);

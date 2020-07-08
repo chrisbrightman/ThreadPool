@@ -14,7 +14,7 @@ target_include_directories(libtp INTERFACE ${threadPoolSrc})
 find_package(Threads)
 
 add_executable(tpbench ${tpbenchSrc})
-target_link_libraries(tpbench libtp ${CMAKE_THREADS_LIBS_INIT})
+target_link_libraries(tpbench libtp Threads::Threads)
 
 ##################
 ## adding gtest ##
@@ -55,4 +55,4 @@ endif()
 include_directories(./src)
 
 add_executable(tests ${threadPoolTestSrc})
-target_link_libraries(tests libtp gtest gmock ${CMAKE_THREADS_LIBS_INIT})
+target_link_libraries(tests libtp gtest gmock Threads::Threads)

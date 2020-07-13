@@ -1,3 +1,7 @@
+/// author: Christopher Brightman
+/// class for the worker threads
+/// they take work of the work queue and do it
+
 #ifndef THREAD_POOL_WORKER_THREAD
 #define THREAD_POOL_WORKER_THREAD
 
@@ -16,21 +20,22 @@ namespace tp {
     template<class T>
 	class workerThread  : public std::thread {
 
+	/// the workers id  
 	unsigned workerId;
+
+	/// no more work is to be added to the queue complete what's left
 	bool isFinished;
 
+	/// the work queue  
 	std::shared_ptr<workQueue<T>> work;
 
 	public:
 
-	    /*
-	    template<class _Callable, class... _Args>
-	    workerThread(short anId, _Callable&& func, _Args&&... _args) : std::thread (func, _args...) {
-            isFinished = false;
-            workerId = anId;
-	    }
-	     */
-
+	    /// <summary>
+	    /// makes a work thread
+	    /// </summary>
+	    /// <param name="anId"> the worker id </param>
+	    /// <param name="workQ"> the work queue to complete</param>
 	    workerThread(unsigned&& anId, std::shared_ptr<workQueue<T>>& workQ)
 	            : std::thread ( [ this] () { this->operate(); } ) {
             workerId = anId;
@@ -38,11 +43,19 @@ namespace tp {
             work = workQ;
         }
 
+        /// <summary>
+        /// tells the worker that no more work is to be added to the queue
+        /// finish what is left
+        /// </summary>
         inline void markDone() {
             isFinished = true;
         }
 
-        inline void setName(unsigned anId) {
+        /// <summary>
+        /// sets an id for the worker
+        /// </summary>
+        /// <param name="anId"></param>
+        inline void setId(unsigned anId) {
             workerId = anId;
         }
 
@@ -57,6 +70,10 @@ namespace tp {
 
     protected:
 
+	    /// <summary>
+	    /// main run for the worker 
+        /// grabs work off the queue and completes it otherwise it waits
+	    /// </summary>
 	    void operate() {
             try {
                 while (!isFinished || !work->isWorkDone()) {

@@ -1,4 +1,5 @@
 //
+// author: christopher Brightman
 // this is the main thread pool object
 // represents a fully managed thread pool for which work can be added
 // must be initialized with a template that is for the return type of the

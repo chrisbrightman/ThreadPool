@@ -13,8 +13,8 @@
 #include "timer.h"
 #include "tpmain.h"
 
-#define MAX_FOR_QUAD 50000
-#define NUM_TASKS std::thread::hardware_concurrency() * 100000
+#define MAX_FOR_QUAD (std::thread::hardware_concurrency() * 20000)
+#define NUM_TASKS (std::thread::hardware_concurrency() * 1000)
 
 template<typename T>
 void toTime(std::function<T()> func, unsigned long numToDo, std::string&& msg, const unsigned& threadMax = 0) {

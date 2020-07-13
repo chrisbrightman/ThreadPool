@@ -1,5 +1,8 @@
 //
-// Created by chris on 5/25/20.
+// this is the main thread pool object
+// represents a fully managed thread pool for which work can be added
+// must be initialized with a template that is for the return type of the
+// function that is being added to the pool
 //
 
 #ifndef MATRIXOPERATIONS_THREADPOOL_H
@@ -26,19 +29,25 @@ namespace tp {
     template<class T>
     class threadPool {
 
+        /// the work left to do
         std::shared_ptr<workQueue<T>> work;
 
+        /// the boss threads
         std::stack<std::shared_ptr<bossThread<T>>> bosses;
 
         unsigned maxThreads{};
 
+        /// is the thread done
         bool isDone;
 
     public:
 
+        /// if no thread limit is given
         threadPool () : threadPool(std::thread::hardware_concurrency() * 4) {
         }
-        
+
+        /// if a thread limit is given
+        /// @param maxThreads the maximum threads to make
         threadPool(unsigned maxThreads) {
             isDone = false;
             bosses = std::stack<std::shared_ptr<bossThread<T>>>();
@@ -52,10 +61,12 @@ namespace tp {
             bosses.push(std::shared_ptr<bossThread<T>>(new bossThread<T>(maxThreads, work)));
         }
 
+        /// waits until the work is done
         ~threadPool() {
             waitUntilDone();
         }
 
+        /// this adds work to the 
         std::shared_ptr<task_s<T>> addWork(std::function<T()> someWork) {
             return work->addWork(someWork);
         }

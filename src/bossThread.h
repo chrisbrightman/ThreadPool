@@ -1,5 +1,4 @@
 // author: christopher Brightman
-// repersents a manager thread to manage all the workers
 
 #ifndef THREAD_POOL_BOSS_THREAD
 #define THREAD_POOL_BOSS_THREAD
@@ -17,6 +16,12 @@
 
 namespace tp {
 
+    /// <summary>
+	/// repersents a manager thread to manage all the workers
+    /// </summary>
+    /// <typeparam name="T">
+	/// the return type for the work to be completed
+	/// </typeparam>
     template<class T>
 	class bossThread : public std::thread {
 

@@ -1,6 +1,4 @@
 /// author: Christopher Brightman
-/// class for the worker threads
-/// they take work of the work queue and do it
 
 #ifndef THREAD_POOL_WORKER_THREAD
 #define THREAD_POOL_WORKER_THREAD
@@ -17,6 +15,13 @@
 
 namespace tp {
 
+    /// <summary>
+    /// class for the worker threads
+    /// they take work of the work queue and do it
+    /// </summary>
+    /// <typeparam name="T">
+    /// the return type for the work to be done
+    /// </typeparam>
     template<class T>
 	class workerThread  : public std::thread {
 

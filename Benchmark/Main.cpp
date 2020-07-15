@@ -1,6 +1,5 @@
-//
-// Created by chris on 6/15/20.
-//
+/// author: Christopher Brightman 
+/// runs a number of benchmarks on the thread pool
 
 #include <cstdlib>
 #include <iostream>
@@ -16,6 +15,24 @@
 #define MAX_FOR_QUAD (std::thread::hardware_concurrency() * 20000)
 #define NUM_TASKS (std::thread::hardware_concurrency() * 1000)
 
+/// <summary>
+/// this creates a timer and runs the given function a given number of times
+/// </summary>
+/// <typeparam name="T">
+/// the return type for the function given
+/// </typeparam>
+/// <param name="func"> 
+/// a fucntion 
+/// </param>
+/// <param name="numToDo"> 
+/// how many times to do the function
+/// </param>
+/// <param name="msg">
+/// a message to print to the console before running the benchmark
+/// </param>
+/// <param name="threadMax">
+/// the maximum number of threads for the pool
+/// </param>
 template<typename T>
 void toTime(std::function<T()> func, unsigned long numToDo, std::string&& msg, const unsigned& threadMax = 0) {
     std::cout << msg << std::endl;
@@ -27,6 +44,10 @@ void toTime(std::function<T()> func, unsigned long numToDo, std::string&& msg, c
     pool.waitUntilDone();
 }
 
+/// <summary>
+/// does the quadradic formula MAX_FOR_QUAD times
+/// </summary>
+/// <returns></returns>
 double quadratic_formula() {
     std::unique_ptr<double[]> returnArray(new double[MAX_FOR_QUAD]);
     for (int i = 1; i < MAX_FOR_QUAD; i++) {

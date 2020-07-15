@@ -1,9 +1,5 @@
 //
 // author: christopher Brightman
-// this is the main thread pool object
-// represents a fully managed thread pool for which work can be added
-// must be initialized with a template that is for the return type of the
-// function that is being added to the pool
 //
 
 #ifndef MATRIXOPERATIONS_THREADPOOL_H
@@ -27,6 +23,15 @@
 
 namespace tp {
 
+    /// <summary>
+    /// this is the main thread pool object
+    /// represents a fully managed thread pool for which work can be added
+    /// must be initialized with a template that is for the return type of the
+    /// function that is being added to the pool
+    /// </summary>
+    /// <typeparam name="T">
+    /// the return type for the function work to be added to the thread pool
+    /// </typeparam>
     template<class T>
     class threadPool {
 

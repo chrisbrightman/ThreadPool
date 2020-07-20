@@ -26,6 +26,12 @@ namespace tp{
         bool isComplete;
     };
 
+    template<>
+    struct task_s<void> {
+        std::function<void()> function;
+        bool isComplete;
+    };
+
     /// <summary>
     /// a synchronized queue for the thread pool
     /// </summary>

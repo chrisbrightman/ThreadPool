@@ -129,6 +129,9 @@ namespace tp {
 		/// if the work queue is too big make more workers
 		/// </summary>
 		void operate() {
+			while (!work) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
 			while (!isFinished) {
 				if (work->workLeftToDo() > numberWorkers * 4) {
 					increaseThreads(numberWorkers);

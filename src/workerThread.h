@@ -6,10 +6,7 @@
 #include <thread>
 #include <string>
 #include <functional>
-
-#ifdef THREAD_POOL_DEBUG
 #include <iostream>
-#endif
 
 #include "workQueue.h"
 
@@ -91,8 +88,14 @@ namespace tp {
                         std::cout << "Worker Thread " << id << " grabed work of type " << type_info(T) << std::endl;
                     #endif
                     if (toDo) {
-                        toDo->returnValue = toDo->function();
-                        toDo->isComplete = true;
+                        if (typeid(T) == typeid(void)) {
+                            toDo->function();
+                            toDo->isComplete = true;
+                        }
+                        else {
+                            toDo->returnValue = toDo->function();
+                            toDo->isComplete = true;
+                        }
                     }
                     std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
@@ -101,11 +104,35 @@ namespace tp {
                 std::cout << "I'm here";
             }
 	    }
+    };
 
-
-	};
+    template<>
+    void workerThread<void>::operate() {
+        try {
+            while (!work) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            while (!isFinished || !work->isWorkDone()) {
+                if (work->isWorkDone()) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    continue;
+                }
+                std::shared_ptr<task_s<void>> toDo = work->dequeueWork();
+                #ifdef THREAD_POOL_DEBUG
+                    std::cout << "Worker Thread " << id << " grabed work of type " << type_info(T) << std::endl;
+                #endif
+                if (toDo) {
+                    toDo->function();
+                    toDo->isComplete = true;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+        }
+        catch (const std::exception& ex) {
+            std::cout << ex.what();
+            std::cout << "I'm here";
+        }
+    }
 }
-
-
 
 #endif // THREAD_POOL_WORKER_THREAD

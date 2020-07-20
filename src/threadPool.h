@@ -49,7 +49,7 @@ namespace tp {
     public:
 
         /// if no thread limit is given
-        threadPool () : threadPool(std::thread::hardware_concurrency() * 4) {
+        threadPool () : threadPool(std::thread::hardware_concurrency() * 15) {
         }
 
         /// if a thread limit is given

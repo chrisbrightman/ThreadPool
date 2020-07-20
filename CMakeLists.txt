@@ -1,12 +1,20 @@
-cmake_minimum_required(VERSION 3.16)
-project(untitled)
+cmake_minimum_required(VERSION 3.10)
+project(threadPool)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
 
-file(GLOB threadPoolSrc ./src/*.cpp ./src/*.h)
-file(GLOB threadPoolTestSrc ./test/*.cpp ./test/*.h)
+file(GLOB threadPoolSrc src/*.cpp src/*.h)
+file(GLOB threadPoolTestSrc test/*.cpp test/*.h)
+file(GLOB tpbenchSrc Benchmark/*.cpp Benchmark/*.h)
 
-add_library(libtp STATIC ${threadPoolSrc})
+add_library(libtp INTERFACE)
+target_include_directories(libtp INTERFACE ${threadPoolSrc})
+
+find_package(Threads)
+
+add_executable(tpbench ${tpbenchSrc})
+target_link_libraries(tpbench libtp Threads::Threads)
 
 ##################
 ## adding gtest ##
@@ -46,5 +54,5 @@ endif()
 
 include_directories(./src)
 
-add_executable(tests ${threadPoolTestSrc} )
-target_link_libraries(tests libtp gtest gmock)
+add_executable(tests ${threadPoolTestSrc})
+target_link_libraries(tests libtp gtest gmock Threads::Threads)

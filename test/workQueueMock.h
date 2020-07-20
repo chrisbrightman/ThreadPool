@@ -6,7 +6,7 @@
 #define MATRIXOPERATIONS_WORKQUEUEMOCK_H
 
 #include "gmock/gmock.h"
-#include "../../src/libtp/workQueue.h"
+#include "workQueue.h"
 
 
 

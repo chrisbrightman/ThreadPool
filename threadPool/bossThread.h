@@ -6,10 +6,7 @@
 #include <stack>
 #include <memory>
 #include <atomic>
-
-#ifdef THREAD_POOL_DEBUG
 #include <iostream>
-#endif
 
 #include "workQueue.h"
 #include "workerThread.h"
@@ -26,7 +23,7 @@ namespace tp {
 	class bossThread : public std::thread {
 
 		// the worker threads
-		std::stack<std::shared_ptr<workerThread<T>>> workers;
+		std::stack<std::shared_ptr<workerThread>> workers;
 
 		// the number of workers
 		std::atomic<int> numberWorkers{};
@@ -60,8 +57,8 @@ namespace tp {
             maxWorkers = threadMax;
             isFinished = false;
             numberWorkers = 1;
-            workers = std::stack<std::shared_ptr<workerThread<T>>>();
-			workers.push(std::shared_ptr<workerThread<T>>(new workerThread<T>(0, someWork)));
+            workers = std::stack<std::shared_ptr<workerThread>>();
+			workers.push(std::shared_ptr<workerThread>(new workerThread(0, someWork)));
 		}
 
 		/// <summery> 
@@ -79,7 +76,7 @@ namespace tp {
         void stopWork() {
             for (int i = 0; i < numberWorkers; i++) {
                 try {
-                    std::shared_ptr<workerThread<T>> worker = workers.top();
+                    std::shared_ptr<workerThread> worker = workers.top();
                     workers.pop();
                     worker->markDone();
                     worker->join();
@@ -104,20 +101,20 @@ namespace tp {
 				return;
 			}
 			if (numberWorkers + numToMake > maxWorkers) {
-				#ifdef THREAD_POOL_DEBUG
+#ifdef THREAD_POOL_DEBUG
 					std::cout << "Creating " << maxWorkers - numberWorkers << " more workers." << std::endl;
-				#endif // THREAD_POOL_DEBUG
-				for (int i = 0; i < maxWorkers - numberWorkers; i++) {
-					workers.push(std::shared_ptr<workerThread<T>>(new workerThread<T>(numberWorkers + i, work)));
+#endif // THREAD_POOL_DEBUG
+				for (unsigned int i = 0; i < maxWorkers - numberWorkers; i++) {
+					workers.push(std::shared_ptr<workerThread>(new workerThread(numberWorkers + i, work)));
 				}
 				numberWorkers = maxWorkers;
 			}
 			else {
-				#ifdef THREAD_POOL_DEBUG
+#ifdef THREAD_POOL_DEBUG
 					std::cout << "Creating " << numToMake<< " more workers." << std::endl;
-				#endif // THREAD_POOL_DEBUG
+#endif // THREAD_POOL_DEBUG
 				for (int i = 0; i < numToMake; i++) {
-					workers.push(std::shared_ptr<workerThread<T>>(new workerThread<T>(numberWorkers + i, work)));
+					workers.push(std::shared_ptr<workerThread>(new workerThread(numberWorkers + i, work)));
 				}
 				numberWorkers += numToMake;
 			}
@@ -129,14 +126,11 @@ namespace tp {
 		/// if the work queue is too big make more workers
 		/// </summary>
 		void operate() {
-			while (!work) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			}
 			while (!isFinished) {
 				if (work->workLeftToDo() > numberWorkers * 4) {
 					increaseThreads(numberWorkers);
 				}
-				std::this_thread::sleep_for(std::chrono::microseconds(100));
+				std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			}
 		}
 

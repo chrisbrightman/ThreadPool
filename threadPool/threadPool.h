@@ -11,7 +11,7 @@
 #include <functional>
 #include <stack>
 #include "workQueue.h"
-#include "workerThread.h"
+#include "bossThread.h"
 
 #include <iostream>
 
@@ -20,7 +20,7 @@ namespace tp {
     template <class T>
     class threadPool {
 
-        std::stack<std::shared_ptr<workerThread>> threads = std::stack<std::shared_ptr<workerThread>>();
+        std::stack<std::shared_ptr<bossThread<T>>> threads = std::stack<std::shared_ptr<bossThread<T>>>();
 
         std::shared_ptr<workQueue<T>> workQ;
         bool isDone;
@@ -30,9 +30,7 @@ namespace tp {
         explicit threadPool (unsigned maxThreads = std::thread::hardware_concurrency()) {
             this->workQ = std::shared_ptr<workQueue<T>>(new workQueue<T>());
             isDone = false;
-            for (unsigned int i = 0; i < maxThreads; i++) {
-                threads.push(std::shared_ptr<workerThread>(new workerThread(std::forward<unsigned >(i), workQ)));
-            }
+            threads.push(std::shared_ptr<bossThread<T>>(new bossThread<T>(maxThreads, workQ)));
         }
 
         ~threadPool() {
@@ -47,10 +45,10 @@ namespace tp {
             isDone = true;
             try {
                 while(!threads.empty()) {
-                    std::shared_ptr<workerThread> thread = threads.top();
+                    std::shared_ptr<bossThread<T>> thread = threads.top();
                     threads.pop();
                     //if (thread->joinable()) {
-                        thread->markDone();
+                        thread->stopWork();
                         thread->join();
                     //}
                 }

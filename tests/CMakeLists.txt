@@ -1,5 +1,4 @@
 
-project(tp)
 
 ##################
 ## adding gtest ##

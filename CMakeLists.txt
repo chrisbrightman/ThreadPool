@@ -25,3 +25,10 @@ endif()
 
 # main library
 add_subdirectory(threadPool)
+
+option(INSTALL_TP YES)
+
+if (INSTALL_TP)
+	install(TARGETS libtp
+		    EXPORT tp)
+endif()

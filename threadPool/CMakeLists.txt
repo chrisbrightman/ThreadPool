@@ -13,6 +13,13 @@ target_include_directories(tp INTERFACE bossThread.h workerThread.cpp workerThre
 option(INSTALL_TP YES)
 
 if (INSTALL_TP)
-	install(TARGETS tp DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/threadpool-build) 
+	include(CMakePackageConfigHelpers)
+	install(TARGETS tp
+		EXPORT TPTargets
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib 
+		RUNTIME DESTINATION bin
+		INCLUDES DESTINATION include 
+		)
 endif()
 

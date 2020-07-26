@@ -8,7 +8,7 @@ if(THREAD_POOL_DEBUG)
 endif()
 
 add_library(tp INTERFACE)
-target_include_directories(tp INTERFACE bossThread.h workerThread.cpp workerThread.h workQueue.h threadPool.h)
+target_include_directories(tp INTERFACE bossThread.h workerThread.h workQueue.h threadPool.h tpmain.h)
 
 option(INSTALL_TP YES)
 
@@ -16,10 +16,9 @@ if (INSTALL_TP)
 	include(CMakePackageConfigHelpers)
 	install(TARGETS tp
 		EXPORT TPTargets
-		LIBRARY DESTINATION lib
-		ARCHIVE DESTINATION lib 
-		RUNTIME DESTINATION bin
-		INCLUDES DESTINATION include 
+		DESTINATION lib
+		EXPORT TPTarget
 		)
+	#install(EXPORT TPTarget DESTINATION lib/TP)
 endif()
 

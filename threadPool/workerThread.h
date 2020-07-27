@@ -34,22 +34,11 @@ namespace tp {
             isFinished = false;
         }
 
-        void markDone() {
-            isFinished = true;
-        }
+        void markDone();
 
-        void setName(unsigned anId) {
-            workerId = anId;
-        }
+        void setName(unsigned anId);
 
-	    ~workerThread() {
-		    while (!isFinished) {
-			    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		    }
-            #ifdef THREAD_POOL_DEBUG
-                std::cout << "Worker id " << workerId << " has finished work." << std::endl;
-            #endif // THREAD_POOL_DEBUG
-	    }
+        ~workerThread();
 
     protected:
 

@@ -7,7 +7,8 @@ if(THREAD_POOL_DEBUG)
 	add_definitions(-DTHREAD_POOL_DEBUG)
 endif()
 
-add_library(tp STATIC bossThread.h workerThread.h workerThread.cpp workQueue.h threadPool.h tpmain.h)
+add_library(tp INTERFACE)
+target_link_libraries(tp INTERFACE bossThread.h workerThread.h workerThread.cpp workQueue.h threadPool.h tpmain.h)
 
 option(INSTALL_TP YES)
 
@@ -16,8 +17,7 @@ if (INSTALL_TP)
 	install(TARGETS tp
 		EXPORT TPTargets
 		DESTINATION lib
-		EXPORT TPTarget
 		)
-	install(EXPORT TPTarget DESTINATION lib/TP)
+	install(FILES tpmain.h DESTINATION include)
 endif()
 

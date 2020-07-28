@@ -25,7 +25,7 @@ if (INSTALL_TP)
 		DESTINATION lib
 		)
 	install(EXPORT TPTargets 
-		FILE TPTargets.cmake 
+		FILE TPConfig.cmake 
 		NAMESPACE TP::
 		DESTINATION lib/cmake/TP
 	    )

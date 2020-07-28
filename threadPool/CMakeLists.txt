@@ -25,9 +25,11 @@ if (INSTALL_TP)
 		DESTINATION lib
 		)
 	install(EXPORT TPTargets 
-		FILE TPConfig.cmake 
+		FILE TPTargets.cmake 
 		NAMESPACE TP::
 		DESTINATION lib/cmake/TP
 	    )
+	set(CMAKE_EXPORT_PACKAGE_REGISTRY ON)
+	export(PACKAGE TP)
 endif()
 
